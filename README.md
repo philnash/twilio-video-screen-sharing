@@ -1,11 +1,10 @@
-# Twilio Video Quickstart for JavaScript
+# Twilio Video Quickstart with Screen Sharing for JavaScript
 
-[![OS X/Linus Build Status](https://secure.travis-ci.org/twilio/video-quickstart-js.png?branch=master)](http://travis-ci.org/twilio/video-quickstart-js) [![Windows Build status](https://ci.appveyor.com/api/projects/status/3u69uy9c0lsap3dr?svg=true
-)](https://ci.appveyor.com/project/markandrus/video-quickstart-js)
+This application is an example of screen sharing over WebRTC connections using
+Twilio Video. It is forked from the [Twilio Video Quickstart](https://github.com/twilio/video-quickstart-js)
+and is extended to include screen sharing in browsers that support it.
 
-This application should give you a ready-made starting point for writing your
-own video apps with Twilio Video. Before we begin, we need to collect
-all the config values we need to run the application:
+To run this application yourself you will need the following credentials:
 
 * Account SID: Your primary Twilio account identifier - find this [in the console here](https://www.twilio.com/console).
 * API Key: Used to authenticate - [generate one here](https://www.twilio.com/console/video/dev-tools/api-keys).
@@ -14,7 +13,7 @@ all the config values we need to run the application:
 ## A Note on API Keys
 
 When you generate an API key pair at the URLs above, your API Secret will only
-be shown once - make sure to save this in a secure location, 
+be shown once - make sure to save this in a secure location,
 or possibly your `~/.bash_profile`.
 
 ## Setting Up The Application
@@ -42,13 +41,6 @@ open another tab and join the same room. Now, you should see your own
 video in both the tabs!
 
 ![screenshot of chat app](https://s3.amazonaws.com/com.twilio.prod.twilio-docs/images/video2.original.png)
-
-## Examples
-
-The project contains some common use-case examples for the Twilio Video JS SDK.
-
-* [Media Device Selection](http://localhost:3000/mediadevices)
-* [Local Video Snapshot](http://localhost:3000/localvideosnapshot)
 
 ## License
 
