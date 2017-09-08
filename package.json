@@ -1,33 +1,26 @@
 {
-  "name": "video-quickstart-js",
+  "name": "twilio-video-screen-sharing",
   "version": "1.0.0-dev",
-  "description": "Twilio Video SDK Quick Start for JavaScript",
+  "description": "Twilio Video Quickstart with Screen Sharing for JavaScript",
   "main": "server/index.js",
   "scripts": {
     "clean": "rimraf quickstart/public/index.js",
-    "build": "watchify quickstart/src/index.js -t [ babelify --presets env ] -o quickstart/public/index.js  -v ",
+    "build":
+      "watchify quickstart/src/index.js -t [ babelify --presets env ] -o quickstart/public/index.js  -v ",
     "serve": "nodemon server --ignore quickstart",
     "start": "npm run clean && concurrently \"npm run build\" \"npm run serve\""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/twilio/video-quickstart-js.git"
+    "url": "https://github.com/philnash/twilio-video-screen-sharing.git"
   },
-  "keywords": [
-    "twilio",
-    "video",
-    "chat",
-    "ip",
-    "real",
-    "time",
-    "diggity"
-  ],
+  "keywords": ["twilio", "video", "screen sharing"],
   "author": "Twilio",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/twilio/video-quickstart-js/issues"
+    "url": "https://github.com/philnash/twilio-video-screen-sharing/issues"
   },
-  "homepage": "https://github.com/twilio/video-quickstart-js#readme",
+  "homepage": "https://github.com/philnash/twilio-video-screen-sharing/",
   "dependencies": {
     "dotenv": "^4.0.0",
     "express": "^4.15.2",
