@@ -1,11 +1,20 @@
 'use strict';
+require('whatwg-fetch');
+const Video = require('twilio-video');
 
-var Video = require('twilio-video');
+let activeRoom;
+let previewTracks;
+let identity;
+let roomName;
 
-var activeRoom;
-var previewTracks;
-var identity;
-var roomName;
+const previewContainer = document.getElementById('local-media');
+const remoteContainer = document.getElementById('remote-media');
+
+const joinButton = document.getElementById('button-join');
+const leaveButton = document.getElementById('button-leave');
+const previewButton = document.getElementById('button-preview');
+const roomControls = document.getElementById('room-controls');
+const roomNameInput = document.getElementById('room-name');
 
 // Attach the Tracks to the DOM.
 function attachTracks(tracks, container) {
@@ -16,7 +25,7 @@ function attachTracks(tracks, container) {
 
 // Attach the Participant's Tracks to the DOM.
 function attachParticipantTracks(participant, container) {
-  var tracks = Array.from(participant.tracks.values());
+  const tracks = Array.from(participant.tracks.values());
   attachTracks(tracks, container);
 }
 
@@ -31,7 +40,7 @@ function detachTracks(tracks) {
 
 // Detach the Participant's Tracks from the DOM.
 function detachParticipantTracks(participant) {
-  var tracks = Array.from(participant.tracks.values());
+  const tracks = Array.from(participant.tracks.values());
   detachTracks(tracks);
 }
 
@@ -40,52 +49,57 @@ function detachParticipantTracks(participant) {
 window.addEventListener('beforeunload', leaveRoomIfJoined);
 
 // Obtain a token from the server in order to connect to the Room.
-$.getJSON('/token', function(data) {
-  identity = data.identity;
-  document.getElementById('room-controls').style.display = 'block';
+fetch('/token')
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(data) {
+    identity = data.identity;
+    roomControls.style.display = 'block';
 
-  // Bind button to join Room.
-  document.getElementById('button-join').onclick = function() {
-    roomName = document.getElementById('room-name').value;
-    if (!roomName) {
-      alert('Please enter a room name.');
-      return;
-    }
+    // Bind button to join Room.
+    joinButton.addEventListener('click', function() {
+      roomName = roomNameInput.value;
+      if (!roomName) {
+        alert('Please enter a room name.');
+        return;
+      }
 
-    log("Joining room '" + roomName + "'...");
-    var connectOptions = {
-      name: roomName,
-      logLevel: 'debug'
-    };
+      log("Joining room '" + roomName + "'...");
+      const connectOptions = {
+        name: roomName,
+        logLevel: 'debug'
+      };
 
-    if (previewTracks) {
-      connectOptions.tracks = previewTracks;
-    }
+      if (previewTracks) {
+        connectOptions.tracks = previewTracks;
+      }
 
-    // Join the Room with the token from the server and the
-    // LocalParticipant's Tracks.
-    Video.connect(data.token, connectOptions).then(roomJoined, function(error) {
-      log('Could not connect to Twilio: ' + error.message);
+      // Join the Room with the token from the server and the
+      // LocalParticipant's Tracks.
+      Video.connect(data.token, connectOptions).then(roomJoined, function(
+        error
+      ) {
+        log('Could not connect to Twilio: ' + error.message);
+      });
     });
-  };
 
-  // Bind button to leave Room.
-  document.getElementById('button-leave').onclick = function() {
-    log('Leaving room...');
-    activeRoom.disconnect();
-  };
-});
+    // Bind button to leave Room.
+    leaveButton.addEventListener('click', function() {
+      log('Leaving room...');
+      activeRoom.disconnect();
+    });
+  });
 
 // Successfully connected!
 function roomJoined(room) {
   window.room = activeRoom = room;
 
   log("Joined as '" + identity + "'");
-  document.getElementById('button-join').style.display = 'none';
-  document.getElementById('button-leave').style.display = 'inline';
+  joinButton.style.display = 'none';
+  leaveButton.style.display = 'inline';
 
   // Attach LocalParticipant's Tracks, if not already attached.
-  var previewContainer = document.getElementById('local-media');
   if (!previewContainer.querySelector('video')) {
     attachParticipantTracks(room.localParticipant, previewContainer);
   }
@@ -93,8 +107,7 @@ function roomJoined(room) {
   // Attach the Tracks of the Room's Participants.
   room.participants.forEach(function(participant) {
     log("Already in Room: '" + participant.identity + "'");
-    var previewContainer = document.getElementById('remote-media');
-    attachParticipantTracks(participant, previewContainer);
+    attachParticipantTracks(participant, remoteContainer);
   });
 
   // When a Participant joins the Room, log the event.
@@ -104,14 +117,13 @@ function roomJoined(room) {
 
   // When a Participant adds a Track, attach it to the DOM.
   room.on('trackAdded', function(track, participant) {
-    log(participant.identity + " added track: " + track.kind);
-    var previewContainer = document.getElementById('remote-media');
-    attachTracks([track], previewContainer);
+    log(participant.identity + ' added track: ' + track.kind);
+    attachTracks([track], remoteContainer);
   });
 
   // When a Participant removes a Track, detach it from the DOM.
   room.on('trackRemoved', function(track, participant) {
-    log(participant.identity + " removed track: " + track.kind);
+    log(participant.identity + ' removed track: ' + track.kind);
     detachTracks([track]);
   });
 
@@ -133,32 +145,34 @@ function roomJoined(room) {
     detachParticipantTracks(room.localParticipant);
     room.participants.forEach(detachParticipantTracks);
     activeRoom = null;
-    document.getElementById('button-join').style.display = 'inline';
-    document.getElementById('button-leave').style.display = 'none';
+    joinButton.style.display = 'inline';
+    leaveButton.style.display = 'none';
   });
 }
 
 // Preview LocalParticipant's Tracks.
-document.getElementById('button-preview').onclick = function() {
-  var localTracksPromise = previewTracks
+previewButton.addEventListener('click', function() {
+  const localTracksPromise = previewTracks
     ? Promise.resolve(previewTracks)
     : Video.createLocalTracks();
 
-  localTracksPromise.then(function(tracks) {
-    window.previewTracks = previewTracks = tracks;
-    var previewContainer = document.getElementById('local-media');
-    if (!previewContainer.querySelector('video')) {
-      attachTracks(tracks, previewContainer);
+  localTracksPromise.then(
+    function(tracks) {
+      window.previewTracks = previewTracks = tracks;
+      if (!previewContainer.querySelector('video')) {
+        attachTracks(tracks, previewContainer);
+      }
+    },
+    function(error) {
+      console.error('Unable to access local media', error);
+      log('Unable to access Camera and Microphone');
     }
-  }, function(error) {
-    console.error('Unable to access local media', error);
-    log('Unable to access Camera and Microphone');
-  });
-};
+  );
+});
 
 // Activity log.
 function log(message) {
-  var logDiv = document.getElementById('log');
+  const logDiv = document.getElementById('log');
   logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
   logDiv.scrollTop = logDiv.scrollHeight;
 }

@@ -5,7 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "clean": "rimraf quickstart/public/index.js",
-    "build": "watchify quickstart/src/index.js -o quickstart/public/index.js -v",
+    "build": "watchify quickstart/src/index.js -t [ babelify --presets env ] -o quickstart/public/index.js  -v ",
     "serve": "nodemon server --ignore quickstart",
     "start": "npm run clean && concurrently \"npm run build\" \"npm run serve\""
   },
@@ -32,9 +32,12 @@
     "dotenv": "^4.0.0",
     "express": "^4.15.2",
     "twilio": "^3.0.0",
-    "twilio-video": "^1.0.0"
+    "twilio-video": "^1.0.0",
+    "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
+    "babel-preset-env": "^1.6.0",
+    "babelify": "^7.3.0",
     "browserify": "^14.3.0",
     "concurrently": "^3.5.0",
     "nodemon": "^1.12.0",
