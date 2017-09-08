@@ -43,53 +43,6 @@ function detachParticipantTracks(participant) {
   detachTracks(tracks);
 }
 
-// When we are about to transition away from this page, disconnect
-// from the room, if joined.
-window.addEventListener('beforeunload', leaveRoomIfJoined);
-
-// Obtain a token from the server in order to connect to the Room.
-fetch('/token')
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(data) {
-    identity = data.identity;
-    roomControls.style.display = 'block';
-
-    // Bind button to join Room.
-    joinButton.addEventListener('click', function() {
-      const roomName = roomNameInput.value;
-      if (!roomName) {
-        alert('Please enter a room name.');
-        return;
-      }
-
-      log("Joining room '" + roomName + "'...");
-      const connectOptions = {
-        name: roomName,
-        logLevel: 'debug'
-      };
-
-      if (previewTracks) {
-        connectOptions.tracks = previewTracks;
-      }
-
-      // Join the Room with the token from the server and the
-      // LocalParticipant's Tracks.
-      Video.connect(data.token, connectOptions).then(roomJoined, function(
-        error
-      ) {
-        log('Could not connect to Twilio: ' + error.message);
-      });
-    });
-
-    // Bind button to leave Room.
-    leaveButton.addEventListener('click', function() {
-      log('Leaving room...');
-      activeRoom.disconnect();
-    });
-  });
-
 // Successfully connected!
 function roomJoined(room) {
   activeRoom = room;
@@ -149,6 +102,63 @@ function roomJoined(room) {
   });
 }
 
+// Activity log.
+function log(message) {
+  const logDiv = document.getElementById('log');
+  logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// Leave Room.
+function leaveRoomIfJoined() {
+  if (activeRoom) {
+    activeRoom.disconnect();
+  }
+}
+
+// Obtain a token from the server in order to connect to the Room.
+fetch('/token')
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(data) {
+    identity = data.identity;
+    roomControls.style.display = 'block';
+
+    // Bind button to join Room.
+    joinButton.addEventListener('click', function() {
+      const roomName = roomNameInput.value;
+      if (!roomName) {
+        alert('Please enter a room name.');
+        return;
+      }
+
+      log("Joining room '" + roomName + "'...");
+      const connectOptions = {
+        name: roomName,
+        logLevel: 'debug'
+      };
+
+      if (previewTracks) {
+        connectOptions.tracks = previewTracks;
+      }
+
+      // Join the Room with the token from the server and the
+      // LocalParticipant's Tracks.
+      Video.connect(data.token, connectOptions).then(roomJoined, function(
+        error
+      ) {
+        log('Could not connect to Twilio: ' + error.message);
+      });
+    });
+
+    // Bind button to leave Room.
+    leaveButton.addEventListener('click', function() {
+      log('Leaving room...');
+      activeRoom.disconnect();
+    });
+  });
+
 // Preview LocalParticipant's Tracks.
 previewButton.addEventListener('click', function() {
   const localTracksPromise = previewTracks
@@ -169,16 +179,6 @@ previewButton.addEventListener('click', function() {
   );
 });
 
-// Activity log.
-function log(message) {
-  const logDiv = document.getElementById('log');
-  logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
-  logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-// Leave Room.
-function leaveRoomIfJoined() {
-  if (activeRoom) {
-    activeRoom.disconnect();
-  }
-}
+// When we are about to transition away from this page, disconnect
+// from the room, if joined.
+window.addEventListener('beforeunload', leaveRoomIfJoined);
