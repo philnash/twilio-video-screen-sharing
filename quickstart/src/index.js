@@ -5,7 +5,6 @@ const Video = require('twilio-video');
 let activeRoom;
 let previewTracks;
 let identity;
-let roomName;
 
 const previewContainer = document.getElementById('local-media');
 const remoteContainer = document.getElementById('remote-media');
@@ -59,7 +58,7 @@ fetch('/token')
 
     // Bind button to join Room.
     joinButton.addEventListener('click', function() {
-      roomName = roomNameInput.value;
+      const roomName = roomNameInput.value;
       if (!roomName) {
         alert('Please enter a room name.');
         return;
@@ -93,7 +92,7 @@ fetch('/token')
 
 // Successfully connected!
 function roomJoined(room) {
-  window.room = activeRoom = room;
+  activeRoom = room;
 
   log("Joined as '" + identity + "'");
   joinButton.style.display = 'none';
@@ -158,7 +157,7 @@ previewButton.addEventListener('click', function() {
 
   localTracksPromise.then(
     function(tracks) {
-      window.previewTracks = previewTracks = tracks;
+      previewTracks = tracks;
       if (!previewContainer.querySelector('video')) {
         attachTracks(tracks, previewContainer);
       }
