@@ -20,15 +20,6 @@ var randomName = require('./randomname');
 // Create Express webapp.
 var app = express();
 
-// Set up the paths for the examples.
-[
-  'mediadevices',
-  'localvideosnapshot'
-].forEach(function(example) {
-  var examplePath = path.join(__dirname, `../examples/${example}/public`);
-  app.use(`/${example}`, express.static(examplePath));
-});
-
 // Set up the path for the quickstart.
 var quickstartPath = path.join(__dirname, '../quickstart/public');
 app.use('/quickstart', express.static(quickstartPath));
